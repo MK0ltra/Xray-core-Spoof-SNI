@@ -42,10 +42,15 @@ jobs:
           path: resources
           key: xray-geodat-
 
-      - name: Add additional assets into package
+      - name: Add additional assets into package (with fallback)
         run: |
-          if [ -d "resources" ]; then
-            mv -f resources/geo* build_assets/ 2>/dev/null || true
+          # Check if resources directory exists and has geo files
+          if [ -d "resources" ] && [ -n "$(ls -A resources/geo* 2>/dev/null)" ]; then
+            echo "Found geo files, copying to build_assets..."
+            mv -f resources/geo* build_assets/ 2>/dev/null || echo "No geo files to copy"
+          else
+            echo "No geo files found in resources directory. Continuing without them."
+            echo "Note: You may need to run the asset update workflow manually."
           fi
 
       - name: Copy README.md & LICENSE
